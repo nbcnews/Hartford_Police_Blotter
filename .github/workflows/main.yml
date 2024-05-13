@@ -1,0 +1,41 @@
+name: Download PDF
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight
+
+jobs:
+  download-pdf:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      
+    - name: Setup R
+      uses: r-lib/actions/setup-r@v2
+      
+    - name: Install Dependencies
+      run: |
+        install.packages("curl")
+        install.packages("stringr")
+      shell: Rscript {0}
+      
+    - name: Download PDF
+      run: |
+        base_url <- "https://www.hartfordct.gov/files/assets/public/v/1317/police/police-documents/blotter"
+        date <- Sys.Date()
+        file_num <- as.integer(str_extract(basename(base_url), "\\d+"))
+        new_file_num <- file_num + 1
+        new_url <- str_replace(base_url, sprintf("%03d", file_num), sprintf("%03d", new_file_num))
+        new_url <- paste0(new_url, ".pdf")
+        download.file(new_url, paste0("blotter_", date, ".pdf"))
+      shell: Rscript {0}
+      
+    - name: Commit and Push
+      run: |
+        git config --local user.email "actions@github.com"
+        git config --local user.name "GitHub Actions"
+        git add blotter_*.pdf
+        git commit -m "Add PDF for $(date +'%Y-%m-%d')"
+        git push
