@@ -23,7 +23,9 @@ jobs:
       
     - name: Download PDF
       run: |
-        base_url <- "https://www.hartfordct.gov/files/assets/public/v/1317/police/police-documents/blotter"
+        library(curl)
+        library(stringr)
+        base_url <- "https://www.hartfordct.gov/files/assets/public/v/1318/police/police-documents/blotter"
         date <- Sys.Date()
         file_num <- as.integer(str_extract(basename(base_url), "\\d+"))
         new_file_num <- file_num + 1
